@@ -1,0 +1,42 @@
+version: '3.8'
+
+services: 
+  mysql_database:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_DATABASE: nodejs_db
+      MYSQL_USER: nodejs_user
+      MYSQL_PASSWORD: 12345
+    volumes:
+      ["mysql:/var/lib/mysql"]
+
+  app:
+    depends_on:
+        - mysql_database
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: node-mysql-app
+    ports:
+      - 4000:4000
+    volumes: 
+      - ./app:/app
+      - app/node_modules
+    stdin_open: true
+    tty: true
+
+  phpmyadmin:
+    depends_on:
+      - mysql_database
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql_database
+      MYSQL_ROOT_PASSWORD: 123
+
+volumes: 
+  mysql: {}
